@@ -7,9 +7,9 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from rppg.config import load_config
-from rppg.hr import HrEstimate, estimate_bpm
+from rppg.hr import estimate_bpm
 from rppg.roi import ForeheadRoiExtractor, RoiResult
-from rppg.signal import SignalBuffer, SignalSample, extract_green_mean
+from rppg.signal import SignalBuffer, SignalSample, extract_rgb_means
 
 
 @dataclass
@@ -17,11 +17,13 @@ class PipelineState:
     bpm: float | None = None
     bpm_display: float | None = None
     confidence: float = 0.0
+    snr: float = 0.0
     face_detected: bool = False
     ready: bool = False
     status: str = "Settling..."
     filtered_signal: np.ndarray = field(default_factory=lambda: np.array([]))
     roi: RoiResult | None = None
+    signal_method: str = "chrom"
 
 
 class PulsePipeline:
@@ -31,19 +33,25 @@ class PulsePipeline:
         self.roi_extractor = ForeheadRoiExtractor(self.config)
         self._bpm_smooth_alpha = float(self.config["bpm_smooth_alpha"])
         self._warmup_seconds = float(self.config["warmup_seconds"])
+        self._signal_method = str(self.config.get("signal_method", "chrom"))
+        self._min_display_confidence = float(self.config.get("min_display_confidence", 0.35))
+        self._harmonic_ratio = float(self.config.get("harmonic_ratio", 0.5))
         self._bpm_display: float | None = None
 
     def process_frame(self, frame_bgr: np.ndarray, timestamp: float) -> PipelineState:
         roi = self.roi_extractor.process(frame_bgr)
-        green_mean = None
+        rgb = None
         if roi.detected and roi.mask is not None:
-            green_mean = extract_green_mean(frame_bgr, roi.mask)
+            rgb = extract_rgb_means(frame_bgr, roi.mask)
 
-        face_ok = roi.detected and green_mean is not None
+        face_ok = roi.detected and rgb is not None
+        r, g, b = rgb if rgb else (0.0, 0.0, 0.0)
         self.buffer.add(
             SignalSample(
                 timestamp=timestamp,
-                green_mean=green_mean if green_mean is not None else 0.0,
+                r_mean=r,
+                g_mean=g,
+                b_mean=b,
                 face_detected=face_ok,
             )
         )
@@ -52,6 +60,7 @@ class PulsePipeline:
             face_detected=face_ok,
             roi=roi,
             ready=self.buffer.duration >= self._warmup_seconds and face_ok,
+            signal_method=self._signal_method,
         )
 
         if not face_ok:
@@ -62,26 +71,28 @@ class PulsePipeline:
             state.status = "Settling..."
             return state
 
-        ts, greens = self.buffer.green_series()
-        if len(greens) < int(self.buffer.estimate_fps() * 4):
+        ts, pulse = self.buffer.pulse_series(self._signal_method)
+        if len(pulse) < int(self.buffer.estimate_fps() * 4):
             state.status = "Settling..."
             return state
 
         fps = self.buffer.estimate_fps()
         hr = estimate_bpm(
-            greens,
+            pulse,
             fps,
             low_hz=self.config["bandpass_low_hz"],
             high_hz=self.config["bandpass_high_hz"],
             order=self.config["bandpass_order"],
             snr_threshold=self.config["snr_threshold"],
             trend_window_seconds=self.config["trend_window_seconds"],
+            harmonic_ratio=self._harmonic_ratio,
         )
 
         state.filtered_signal = hr.filtered_signal
         state.confidence = hr.confidence
+        state.snr = hr.snr
 
-        if hr.bpm is not None:
+        if hr.bpm is not None and hr.confidence >= self._min_display_confidence:
             state.bpm = hr.bpm
             if self._bpm_display is None:
                 self._bpm_display = hr.bpm
@@ -91,8 +102,8 @@ class PulsePipeline:
             state.bpm_display = self._bpm_display
             state.status = "Measuring"
         else:
-            state.bpm_display = self._bpm_display
-            state.status = "Low signal"
+            state.bpm_display = self._bpm_display if hr.confidence >= self._min_display_confidence else None
+            state.status = "Low signal" if face_ok else "Face not detected"
 
         return state
 

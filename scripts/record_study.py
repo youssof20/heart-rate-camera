@@ -103,6 +103,9 @@ def main() -> int:
                 status=state.status,
                 confidence=state.confidence,
                 waveform=state.filtered_signal if len(state.filtered_signal) else None,
+                reference_bpm=metadata.reference_bpm,
+                signal_method=state.signal_method,
+                snr=state.snr,
             )
             elapsed = packet.timestamp - start
             cv2.putText(

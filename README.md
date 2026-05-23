@@ -38,11 +38,17 @@ All processing runs in the browser. No video is uploaded.
 ## How it works
 
 ```
-Webcam → MediaPipe face mesh → forehead ROI → green channel mean
-      → detrend → Butterworth 0.75-2.5 Hz → FFT peak → BPM × 60
+Webcam → MediaPipe face mesh → forehead ROI → RGB means
+      → CHROM (default) or green → detrend → bandpass 0.75-2.5 Hz
+      → FFT peak + harmonic check → BPM × 60
 ```
 
-Shared parameters: [`config/pipeline.json`](config/pipeline.json) (Python) and [`web/config/pipeline.json`](web/config/pipeline.json) (browser). Keep both files in sync when you tune settings.
+Python defaults to **CHROM** in [`config/pipeline.json`](config/pipeline.json). The browser demo still uses green (see [`web/config/pipeline.json`](web/config/pipeline.json)).
+
+```bash
+python scripts/live.py --reference-bpm 72          # live error vs pulse ox
+python scripts/live.py --signal-method green       # original green-only path
+```
 
 ## Study workflow
 
@@ -78,11 +84,9 @@ data/sessions/           # Recordings (gitignored)
 
 ## Limitations
 
-- Green-channel mean is the simplest rPPG method. It skews under uneven light and across skin tones.
+- CHROM helps across skin tones but is not perfect. Green-only remains available for comparison.
 - Motion, occlusion, darkness, and glare break estimation. See [`docs/FAILURE_MODES.md`](docs/FAILURE_MODES.md).
-- Web and Python share config but can disagree slightly because of camera and FPS differences.
-
-CHROM or POS in Python would be a fairer follow-up if you extend the project.
+- Web and Python can disagree (browser still uses green-only).
 
 ## Clinical context
 

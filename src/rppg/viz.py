@@ -20,11 +20,13 @@ def draw_hud(
     confidence: float,
     waveform: np.ndarray | None = None,
     waveform_height: int = 120,
+    reference_bpm: float | None = None,
+    signal_method: str = "chrom",
+    snr: float = 0.0,
 ) -> None:
     h, w = frame.shape[:2]
     bar_y = h - waveform_height
 
-    # Waveform panel background
     overlay = frame.copy()
     cv2.rectangle(overlay, (0, bar_y), (w, h), (20, 20, 20), -1)
     cv2.addWeighted(overlay, 0.6, frame, 0.4, 0, frame)
@@ -45,10 +47,13 @@ def draw_hud(
         for i in range(1, len(points)):
             cv2.line(frame, points[i - 1], points[i], (0, 220, 255), 2)
 
-    # BPM text
-    if bpm is not None:
+    low_conf = confidence > 0 and confidence < 0.35
+    if bpm is not None and not low_conf:
         bpm_text = f"{bpm:.0f} BPM"
         color = (0, 255, 128)
+    elif bpm is not None:
+        bpm_text = f"{bpm:.0f} BPM"
+        color = (140, 140, 140)
     else:
         bpm_text = "-- BPM"
         color = (180, 180, 180)
@@ -64,15 +69,54 @@ def draw_hud(
         2,
         cv2.LINE_AA,
     )
-    conf_text = f"conf {confidence:.0%}" if confidence > 0 else ""
-    if conf_text:
+
+    y_meta = 140
+    if confidence > 0:
         cv2.putText(
             frame,
-            conf_text,
-            (20, 140),
+            f"conf {confidence:.0%}",
+            (20, y_meta),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.6,
             (160, 160, 160),
+            1,
+            cv2.LINE_AA,
+        )
+        y_meta += 24
+
+    if snr > 0:
+        cv2.putText(
+            frame,
+            f"snr {snr:.1f}",
+            (20, y_meta),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.55,
+            (130, 130, 130),
+            1,
+            cv2.LINE_AA,
+        )
+        y_meta += 22
+
+    cv2.putText(
+        frame,
+        signal_method.upper(),
+        (w - 110, 30),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.55,
+        (100, 100, 100),
+        1,
+        cv2.LINE_AA,
+    )
+
+    if reference_bpm is not None and bpm is not None and not low_conf:
+        err = bpm - reference_bpm
+        cv2.putText(
+            frame,
+            f"vs ref {err:+.0f} BPM",
+            (20, y_meta),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.6,
+            (180, 200, 255),
             1,
             cv2.LINE_AA,
         )

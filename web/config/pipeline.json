@@ -1,4 +1,5 @@
 {
+  "signal_method": "green",
   "buffer_seconds": 18,
   "warmup_seconds": 8,
   "trend_window_seconds": 1.5,

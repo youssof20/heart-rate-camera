@@ -8,10 +8,10 @@ import sys
 import time
 from pathlib import Path
 
-# Setup path before rppg imports
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from rppg.capture import WebcamCapture
+from rppg.config import load_config
 from rppg.pipeline import PulsePipeline
 from rppg.viz import draw_hud, draw_roi
 
@@ -29,6 +29,18 @@ def main() -> int:
     parser.add_argument("--camera", type=int, default=0, help="Camera device index")
     parser.add_argument("--no-mirror", action="store_true", help="Disable horizontal flip")
     parser.add_argument(
+        "--reference-bpm",
+        type=float,
+        default=None,
+        help="Pulse ox or manual reference BPM (shows live error)",
+    )
+    parser.add_argument(
+        "--signal-method",
+        choices=["chrom", "green"],
+        default=None,
+        help="Override config signal_method",
+    )
+    parser.add_argument(
         "--events-log",
         type=Path,
         default=None,
@@ -36,11 +48,18 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    cam = WebcamCapture(device_index=args.camera, mirror=not args.no_mirror)
-    pipeline = PulsePipeline()
-    events_log = args.events_log
+    config = load_config()
+    if args.signal_method:
+        config["signal_method"] = args.signal_method
 
-    print("Controls: q=quit | m=motion b=breath-hold o=occlusion d=dark t=torch")
+    cam = WebcamCapture(device_index=args.camera, mirror=not args.no_mirror)
+    pipeline = PulsePipeline(config)
+    events_log = args.events_log
+    method = config.get("signal_method", "chrom")
+
+    print(f"Signal: {method} | Controls: q=quit m/b/o/d/t events")
+    if args.reference_bpm:
+        print(f"Reference BPM: {args.reference_bpm}")
 
     try:
         cam.open()
@@ -62,6 +81,9 @@ def main() -> int:
                 status=state.status,
                 confidence=state.confidence,
                 waveform=waveform,
+                reference_bpm=args.reference_bpm,
+                signal_method=state.signal_method,
+                snr=state.snr,
             )
 
             cv2 = __import__("cv2")
