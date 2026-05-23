@@ -1,6 +1,6 @@
-# Failure Modes — Stress Test Log
+# Failure Modes: Stress Test Log
 
-Document what breaks the demo and why. Update this file as you film the video.
+What breaks the demo and why. Update as you film.
 
 ## How to tag events (desktop)
 
@@ -8,11 +8,11 @@ While running `python scripts/live.py`, press:
 
 | Key | Tag | Expected failure |
 |-----|-----|------------------|
-| `m` | motion | Head shake, sprint — motion artifacts dominate |
-| `b` | breath_hold | HR may drift; signal morphology changes |
-| `o` | occlusion | Hand over forehead — face/ROI lost |
+| `m` | motion | Head shake or sprint; motion artifacts swamp the pulse |
+| `b` | breath_hold | HR may drift; waveform shape changes |
+| `o` | occlusion | Hand over forehead; face or ROI lost |
 | `d` | dark | Low SNR, missed peaks, unstable BPM |
-| `t` | torch | Saturation, clipping, wrong dominant frequency |
+| `t` | torch | Saturation, clipping, wrong peak frequency |
 
 Optional log file: `python scripts/live.py --events-log data/events.csv`
 
@@ -30,13 +30,13 @@ Optional log file: `python scripts/live.py --events-log data/events.csv`
 
 - **What happened:**
 - **BPM behavior:**
-- **Why:** CO₂ response changes perfusion; rPPG sees hemodynamics, not “heart stopped.”
+- **Why:** CO2 response changes perfusion; rPPG sees hemodynamics, not a stopped heart.
 
 ### Partial face cover
 
 - **What happened:**
 - **BPM behavior:**
-- **Why:** ROI no longer tracks forehead skin; green mean reflects clothing/hand.
+- **Why:** ROI no longer tracks forehead skin; green mean picks up clothing or hand.
 
 ### Lights off
 
@@ -48,18 +48,18 @@ Optional log file: `python scripts/live.py --events-log data/events.csv`
 
 - **What happened:**
 - **BPM behavior:**
-- **Why:** auto-exposure and saturation destroy subtle color fluctuations.
+- **Why:** auto-exposure and saturation wipe out small color swings.
 
 ### Skin tone bias (study)
 
 - **Fitzpatrick groups tested:**
 - **MAE trend:**
-- **Why:** green-channel rPPG assumes certain optical absorption; melanin and lighting interact. Document quantitatively in `analyze_study.py` output.
+- **Why:** green-channel rPPG assumes certain optical absorption; melanin and lighting interact. Put numbers in `analyze_study.py` output.
 
 ---
 
 ## Clinical context (for video outro)
 
-Research hospitals use **remote photoplethysmography (rPPG)** in ICU and post-op monitoring to detect pulse without contact sensors. The technology exists; barriers include **lighting**, **motion**, and **skin tone bias** in training data and simple algorithms.
+Research hospitals use remote photoplethysmography (rPPG) in ICU and post-op monitoring to detect pulse without contact sensors. It works in papers; in practice you fight lighting, motion, and skin tone bias in training data and simple algorithms.
 
-This demo uses the simplest method (forehead green-channel mean). It is instructive, not clinical-grade.
+This repo uses forehead green-channel mean. Demo only, not clinical grade.

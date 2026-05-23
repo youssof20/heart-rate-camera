@@ -196,7 +196,7 @@ function stop() {
 
 startBtn.addEventListener("click", () => start().catch((e) => {
   console.error(e);
-  statusEl.textContent = "Camera error — use HTTPS or localhost";
+  statusEl.textContent = "Camera error. Use HTTPS or localhost.";
   startBtn.disabled = false;
 }));
 stopBtn.addEventListener("click", stop);

@@ -9,6 +9,6 @@ internal/
   scripts/         # one-off experiments
 ```
 
-Everything under `internal/` is listed in `.gitignore` and will not be pushed to GitHub.
+Everything under `internal/` is in `.gitignore` and never gets pushed.
 
 Public documentation: `README.md`, `docs/STUDY_PROTOCOL.md`, `docs/FAILURE_MODES.md`.

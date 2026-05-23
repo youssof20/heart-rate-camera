@@ -1,10 +1,10 @@
 # My Camera Is Taking Your Pulse Right Now
 
-Remote photoplethysmography (rPPG) from a webcam: MediaPipe finds your forehead, the green channel averages subtle color changes from blood volume pulse, a Butterworth bandpass keeps the 0.75–2.5 Hz band, and FFT returns beats per minute.
+Remote photoplethysmography (rPPG) from a webcam: MediaPipe finds your forehead, the green channel averages subtle color changes from blood volume pulse, a Butterworth bandpass keeps the 0.75-2.5 Hz band, and FFT returns beats per minute.
 
-**Research angle:** measure accuracy degradation across Fitzpatrick skin types and lighting — documented honestly, not as a perfect demo.
+The study side tracks error across Fitzpatrick skin types and lighting. Publish the numbers you get, including bad runs.
 
-> **Not a medical device.** Research and education only.
+**Not a medical device.** Research and education only.
 
 ## Quick start
 
@@ -20,7 +20,7 @@ python scripts/live.py
 
 First run downloads the MediaPipe face landmarker model into `models/`.
 
-Controls: `q` quit · `m` motion · `b` breath-hold · `o` occlusion · `d` dark · `t` torch
+Controls: `q` quit, `m` motion, `b` breath-hold, `o` occlusion, `d` dark, `t` torch
 
 ### Browser (audience demo)
 
@@ -31,7 +31,7 @@ cd web
 python -m http.server 8080
 ```
 
-Open [http://localhost:8080](http://localhost:8080). Camera access requires **localhost** or **HTTPS**.
+Open [http://localhost:8080](http://localhost:8080). Camera access needs **localhost** or **HTTPS**.
 
 All processing runs in the browser. No video is uploaded.
 
@@ -39,10 +39,10 @@ All processing runs in the browser. No video is uploaded.
 
 ```
 Webcam → MediaPipe face mesh → forehead ROI → green channel mean
-      → detrend → Butterworth 0.75–2.5 Hz → FFT peak → BPM × 60
+      → detrend → Butterworth 0.75-2.5 Hz → FFT peak → BPM × 60
 ```
 
-Shared parameters: [`config/pipeline.json`](config/pipeline.json) (Python) and [`web/config/pipeline.json`](web/config/pipeline.json) (browser — keep in sync).
+Shared parameters: [`config/pipeline.json`](config/pipeline.json) (Python) and [`web/config/pipeline.json`](web/config/pipeline.json) (browser). Keep both files in sync when you tune settings.
 
 ## Study workflow
 
@@ -57,11 +57,11 @@ Shared parameters: [`config/pipeline.json`](config/pipeline.json) (Python) and [
 |-------------|---|-----------|------------|
 | *pending* | | | |
 
-Run `analyze_study.py` after recording; paste aggregate stats here.
+Run `analyze_study.py` after recording and paste aggregate stats here.
 
 ## Private notes (not on GitHub)
 
-Personal shoot notes, drafts, and internal scripts belong in `internal/` (gitignored). See [`templates/internal/README.md`](templates/internal/README.md). Only aggregate, anonymized study results belong in the public repo.
+Personal shoot notes, drafts, and internal scripts go in `internal/` (gitignored). See [`templates/internal/README.md`](templates/internal/README.md). Only aggregate, anonymized study results belong in the public repo.
 
 ## Project layout
 
@@ -78,25 +78,25 @@ data/sessions/           # Recordings (gitignored)
 
 ## Limitations
 
-- **Green-channel mean** is the simplest rPPG method and is **biased across skin tones** under uneven light.
-- Motion, occlusion, darkness, and glare break estimation — see failure modes doc.
-- Web and Python pipelines are aligned by config but may differ slightly due to camera and FPS differences.
+- Green-channel mean is the simplest rPPG method. It skews under uneven light and across skin tones.
+- Motion, occlusion, darkness, and glare break estimation. See [`docs/FAILURE_MODES.md`](docs/FAILURE_MODES.md).
+- Web and Python share config but can disagree slightly because of camera and FPS differences.
 
-Optional future work: CHROM or POS methods in Python for fairer comparison (see plan).
+CHROM or POS in Python would be a fairer follow-up if you extend the project.
 
 ## Clinical context
 
-Contactless pulse monitoring via rPPG is an active research area for ICU and post-operative settings (e.g. monitoring without adhesive sensors). Practical deployment still faces **lighting control**, **motion robustness**, and **equitable performance across skin tones**.
+Hospitals use contactless rPPG in ICU and post-op research to watch pulse without stick-on sensors. Lighting, motion, and skin tone still limit real deployments. Simple green-channel methods inherit that bias.
 
-References (starting points):
+References:
 
 - Verkruysse et al., *Remote plethysmographic imaging using ambient light* (2008)
 - de Haan & Jeanne, *Robust pulse rate from chrominance-based rPPG* (CHROM, 2013)
-- Recent surveys on bias and dataset diversity in rPPG ML
+- Surveys on bias and dataset diversity in rPPG ML
 
 ## Stack
 
-Python · OpenCV · MediaPipe · SciPy · Matplotlib · vanilla JS (browser)
+Python, OpenCV, MediaPipe, SciPy, Matplotlib, vanilla JS (browser)
 
 ## License
 
