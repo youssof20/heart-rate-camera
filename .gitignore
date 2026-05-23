@@ -19,12 +19,12 @@ data/reports/
 data/events.csv
 data/*.csv
 
-# --- Private / internal (never publish) ---
-internal/
-private/
-notes/
-scratch/
-plans/
+# --- Private / internal (never publish; root folders only) ---
+/internal/
+/private/
+/notes/
+/scratch/
+/plans/
 .cursor/
 
 # Internal docs, shoot notes, drafts (public docs live in docs/ and README)
