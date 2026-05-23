@@ -1,0 +1,54 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+env/
+.env
+
+# Downloaded models
+models/*.task
+
+# Recorded study data (keep local)
+data/sessions/
+data/reports/
+data/events.csv
+data/*.csv
+
+# --- Private / internal (never publish) ---
+internal/
+private/
+notes/
+scratch/
+plans/
+.cursor/
+
+# Internal docs, shoot notes, drafts (public docs live in docs/ and README)
+docs/internal/
+docs/drafts/
+docs/notes/
+*.private.md
+*.local.md
+*.draft.md
+
+# Internal-only scripts (public scripts stay in scripts/)
+scripts/internal/
+scripts/dev/
+scripts/*.local.py
+
+# Local env overrides
+.env.local
+config/*.local.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

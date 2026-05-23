@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your camera is taking your pulse</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>My Camera Is Taking Your Pulse Right Now</h1>
+      <p>Remote photoplethysmography — all processing happens in your browser. Nothing is uploaded.</p>
+    </header>
+
+    <main>
+      <div id="stage">
+        <video id="video" playsinline autoplay muted></video>
+        <canvas id="canvas"></canvas>
+        <div id="overlay">
+          <div class="bpm-display" id="bpm">-- BPM</div>
+          <div class="status-display" id="status">Click Start</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="startBtn">Start camera</button>
+        <button id="stopBtn" class="secondary" disabled>Stop</button>
+      </div>
+    </main>
+
+    <footer>
+      <p class="privacy">
+        Privacy: video frames never leave your device. This is a research demo, not a medical device.
+      </p>
+      <p>
+        Sit still, face the camera in normal indoor light, and wait ~8 seconds for the reading to settle.
+      </p>
+    </footer>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
