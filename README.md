@@ -1,107 +1,78 @@
-# My Camera Is Taking Your Pulse Right Now
+# Heart Rate Camera
 
-Remote photoplethysmography (rPPG) from a webcam: MediaPipe finds your forehead, the green channel averages subtle color changes from blood volume pulse, a Butterworth bandpass keeps the 0.75-2.5 Hz band, and FFT returns beats per minute.
+Estimates your heart rate (BPM) from a webcam.
 
-The study side tracks error across Fitzpatrick skin types and lighting. Publish the numbers you get, including bad runs.
+1. Finds your face and forehead.
+2. Reads small color changes in the skin (blood pulse).
+3. Filters the signal and shows BPM.
 
-**Not a medical device.** Research and education only.
+Not a medical device. For learning and experiments only.
 
-## Quick start
-
-### Python (desktop)
+## Run (Python)
 
 ```bash
-cd heart-rate-camera
 python -m venv .venv
-.venv\Scripts\activate          # Windows
+.venv\Scripts\activate
 pip install -r requirements.txt
 python scripts/live.py
 ```
 
-First run downloads the MediaPipe face landmarker model into `models/`.
+First run downloads the face model into `models/`.
 
-Controls: `q` quit, `m` motion, `b` breath-hold, `o` occlusion, `d` dark, `t` torch
+Keys: `q` quit, `m` motion, `b` breath-hold, `o` cover face, `d` dark, `t` bright light
 
-### Browser (audience demo)
+Optional:
 
-Serve from the **web/** folder (required for ES modules):
+```bash
+python scripts/live.py --reference-bpm 72
+python scripts/live.py --signal-method green
+```
+
+## Run (browser)
 
 ```bash
 cd web
 python -m http.server 8080
 ```
 
-Open [http://localhost:8080](http://localhost:8080). Camera access needs **localhost** or **HTTPS**.
-
-All processing runs in the browser. No video is uploaded.
+Open http://localhost:8080. Needs localhost or HTTPS for camera access. Nothing is uploaded.
 
 ## How it works
 
-```
-Webcam → MediaPipe face mesh → forehead ROI → RGB means
-      → CHROM (default) or green → detrend → bandpass 0.75-2.5 Hz
-      → FFT peak + harmonic check → BPM × 60
-```
+- **Face:** MediaPipe face mesh, forehead region.
+- **Signal:** RGB from forehead. Python uses CHROM by default; browser uses green channel.
+- **Rate:** Bandpass filter (0.75-2.5 Hz), FFT peak, convert to BPM.
 
-Python defaults to **CHROM** in [`config/pipeline.json`](config/pipeline.json). The browser demo still uses green (see [`web/config/pipeline.json`](web/config/pipeline.json)).
+Settings: [`config/pipeline.json`](config/pipeline.json)
+
+## Study (optional)
+
+Record sessions and compare to a pulse oximeter:
 
 ```bash
-python scripts/live.py --reference-bpm 72          # live error vs pulse ox
-python scripts/live.py --signal-method green       # original green-only path
+python scripts/record_study.py
+python scripts/analyze_study.py
 ```
 
-## Study workflow
+See [`docs/STUDY_PROTOCOL.md`](docs/STUDY_PROTOCOL.md).
 
-1. Read [`docs/STUDY_PROTOCOL.md`](docs/STUDY_PROTOCOL.md)
-2. Record sessions: `python scripts/record_study.py`
-3. Analyze: `python scripts/analyze_study.py`
-4. Log stress tests: [`docs/FAILURE_MODES.md`](docs/FAILURE_MODES.md)
+## Limits
 
-### Results (fill after data collection)
+- Sit still, normal indoor light works best.
+- Motion, dark rooms, and bright torch break the reading.
+- Not as accurate as a finger sensor.
 
-| Fitzpatrick | n | MAE (BPM) | RMSE (BPM) |
-|-------------|---|-----------|------------|
-| *pending* | | | |
-
-Run `analyze_study.py` after recording and paste aggregate stats here.
-
-## Private notes (not on GitHub)
-
-Personal shoot notes, drafts, and internal scripts go in `internal/` (gitignored). See [`templates/internal/README.md`](templates/internal/README.md). Only aggregate, anonymized study results belong in the public repo.
-
-## Project layout
+## Code
 
 ```
-config/pipeline.json     # Shared DSP + ROI settings
-src/rppg/                # Python library
-scripts/live.py          # Live demo
-scripts/record_study.py  # Study capture
-scripts/analyze_study.py # MAE / RMSE / plots
-web/                     # Browser demo
-docs/                    # Protocol + failure modes
-data/sessions/           # Recordings (gitignored)
+src/rppg/       library
+scripts/        live demo and study tools
+web/            browser demo
+config/         settings
 ```
 
-## Limitations
+Private notes go in `internal/` (not in git). See [`templates/internal/README.md`](templates/internal/README.md).
 
-- CHROM helps across skin tones but is not perfect. Green-only remains available for comparison.
-- Motion, occlusion, darkness, and glare break estimation. See [`docs/FAILURE_MODES.md`](docs/FAILURE_MODES.md).
-- Web and Python can disagree (browser still uses green-only).
+## Uses
 
-## Clinical context
-
-Hospitals use contactless rPPG in ICU and post-op research to watch pulse without stick-on sensors. Lighting, motion, and skin tone still limit real deployments. Simple green-channel methods inherit that bias.
-
-References:
-
-- Verkruysse et al., *Remote plethysmographic imaging using ambient light* (2008)
-- de Haan & Jeanne, *Robust pulse rate from chrominance-based rPPG* (CHROM, 2013)
-- Surveys on bias and dataset diversity in rPPG ML
-
-## Stack
-
-Python, OpenCV, MediaPipe, SciPy, Matplotlib, vanilla JS (browser)
-
-## License
-
-MIT (add `LICENSE` if publishing to GitHub)
+Python, OpenCV, MediaPipe, SciPy, Matplotlib, JavaScript

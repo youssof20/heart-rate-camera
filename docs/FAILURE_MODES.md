@@ -1,65 +1,35 @@
-# Failure Modes: Stress Test Log
+# When the reading fails
 
-What breaks the demo and why. Update as you film.
+Press these keys while `python scripts/live.py` runs:
 
-## How to tag events (desktop)
+| Key | What you did | What happens |
+|-----|--------------|--------------|
+| `m` | Move head / shake | Bad reading |
+| `b` | Hold breath | BPM may drift |
+| `o` | Cover forehead | Face lost |
+| `d` | Lights off | Noisy signal |
+| `t` | Bright light on face | Wrong peak |
 
-While running `python scripts/live.py`, press:
+Log file (optional): `python scripts/live.py --events-log data/events.csv`
 
-| Key | Tag | Expected failure |
-|-----|-----|------------------|
-| `m` | motion | Head shake or sprint; motion artifacts swamp the pulse |
-| `b` | breath_hold | HR may drift; waveform shape changes |
-| `o` | occlusion | Hand over forehead; face or ROI lost |
-| `d` | dark | Low SNR, missed peaks, unstable BPM |
-| `t` | torch | Saturation, clipping, wrong peak frequency |
+## Notes (fill in as you test)
 
-Optional log file: `python scripts/live.py --events-log data/events.csv`
+### Motion
 
----
+- What happened:
+- BPM:
 
-## Template (fill in during filming)
+### Dark room
 
-### Motion / sprint
+- What happened:
+- BPM:
 
-- **What happened:**
-- **BPM behavior:**
-- **Why (physics):** bulk tissue motion adds low-frequency noise unrelated to blood volume pulse.
+### Bright light
 
-### Breath-hold
+- What happened:
+- BPM:
 
-- **What happened:**
-- **BPM behavior:**
-- **Why:** CO2 response changes perfusion; rPPG sees hemodynamics, not a stopped heart.
+### Skin tone tests
 
-### Partial face cover
-
-- **What happened:**
-- **BPM behavior:**
-- **Why:** ROI no longer tracks forehead skin; green mean picks up clothing or hand.
-
-### Lights off
-
-- **What happened:**
-- **BPM behavior:**
-- **Why:** camera noise dominates; SNR below threshold.
-
-### Torch / bright glare
-
-- **What happened:**
-- **BPM behavior:**
-- **Why:** auto-exposure and saturation wipe out small color swings.
-
-### Skin tone bias (study)
-
-- **Fitzpatrick groups tested:**
-- **MAE trend:**
-- **Why:** green-channel rPPG assumes certain optical absorption; melanin and lighting interact. Put numbers in `analyze_study.py` output.
-
----
-
-## Clinical context (for video outro)
-
-Research hospitals use remote photoplethysmography (rPPG) in ICU and post-op monitoring to detect pulse without contact sensors. It works in papers; in practice you fight lighting, motion, and skin tone bias in training data and simple algorithms.
-
-This repo uses forehead green-channel mean. Demo only, not clinical grade.
+- Fitzpatrick groups:
+- Error (MAE):

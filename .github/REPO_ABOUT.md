@@ -1,33 +1,24 @@
-# GitHub repository settings (manual)
+# GitHub repo info
 
 Repo: https://github.com/youssof20/heart-rate-camera
 
-## Description (About)
+## Description
 
 ```
-Webcam rPPG: live heart rate in Python and the browser. MediaPipe forehead ROI, pulse bandpass, FFT BPM. Includes a skin-tone accuracy study.
+Webcam heart rate (BPM) from face color changes. Python and browser demos. OpenCV, MediaPipe, FFT.
 ```
 
-## Topics (tags)
+## Topics
 
 ```
 rppg
-photoplethysmography
 heart-rate
-pulse-detection
 opencv
 mediapipe
 python
 javascript
 webcam
-signal-processing
-health-monitoring
 computer-vision
-biomedical-engineering
 ```
 
-Under **Settings → General → Topics**, add each tag (comma-separated if the UI allows).
-
-## Website (optional)
-
-GitHub Pages from `web/`, or link to a deployed demo when you have one.
+Add under Settings → General → Topics.
