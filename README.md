@@ -1,14 +1,12 @@
 # Heart Rate Camera
 
-Estimates your heart rate (BPM) from a webcam.
+Estimates heart rate from webcam video using remote photoplethysmography (rPPG).
 
-1. Finds your face and forehead.
-2. Reads small color changes in the skin (blood pulse).
-3. Filters the signal and shows BPM.
+It tracks color changes in the forehead, filters the pulse signal, and estimates BPM.
 
-Not a medical device. For learning and experiments only.
+Not a medical device.
 
-## Run (Python)
+## Run
 
 ```bash
 python -m venv .venv
@@ -17,9 +15,7 @@ pip install -r requirements.txt
 python scripts/live.py
 ```
 
-First run downloads the face model into `models/`.
-
-Keys: `q` quit, `m` motion, `b` breath-hold, `o` cover face, `d` dark, `t` bright light
+The first run downloads the face model into `models/`.
 
 Optional:
 
@@ -28,51 +24,42 @@ python scripts/live.py --reference-bpm 72
 python scripts/live.py --signal-method green
 ```
 
-## Run (browser)
+## Browser
 
 ```bash
 cd web
 python -m http.server 8080
 ```
 
-Open http://localhost:8080. Needs localhost or HTTPS for camera access. Nothing is uploaded.
+Open `http://localhost:8080`.
+
+Camera data stays in the browser.
 
 ## How it works
 
-- **Face:** MediaPipe face mesh, forehead region.
-- **Signal:** RGB from forehead. Python uses CHROM by default; browser uses green channel.
-- **Rate:** Bandpass filter (0.75-2.5 Hz), FFT peak, convert to BPM.
+* MediaPipe tracks the face and forehead region.
+* RGB values are sampled from the forehead.
+* Python uses CHROM by default.
+* The signal is band-pass filtered from 0.75–2.5 Hz.
+* BPM is estimated from the dominant frequency.
 
-Settings: [`config/pipeline.json`](config/pipeline.json)
+## Evaluation
 
-## Study (optional)
-
-Record sessions and compare to a pulse oximeter:
+Record sessions against a reference pulse oximeter:
 
 ```bash
 python scripts/record_study.py
 python scripts/analyze_study.py
 ```
 
-See [`docs/STUDY_PROTOCOL.md`](docs/STUDY_PROTOCOL.md).
+See `docs/STUDY_PROTOCOL.md`.
 
 ## Limits
 
-- Sit still, normal indoor light works best.
-- Motion, dark rooms, and bright torch break the reading.
-- Not as accurate as a finger sensor.
+Motion and poor lighting can make the estimate unreliable.
 
-## Code
+A finger sensor is more accurate.
 
-```
-src/rppg/       library
-scripts/        live demo and study tools
-web/            browser demo
-config/         settings
-```
+## License
 
-Private notes go in `internal/` (not in git). See [`templates/internal/README.md`](templates/internal/README.md).
-
-## Uses
-
-Python, OpenCV, MediaPipe, SciPy, Matplotlib, JavaScript
+MIT
